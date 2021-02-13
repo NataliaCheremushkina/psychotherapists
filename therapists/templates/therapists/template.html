@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>Therapists</title>
+  </head>
+  <body class="bg-light">
+    <div class="bg-white container">
+
+      <!-- Content -->
+      <div id="therapists">
+        <router-view></router-view>
+      </div>
+
+
+    </div>
+
+    <!-- Vue.js -->
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://unpkg.com/vue-router"></script>
+    <script src="https://unpkg.com/vuex"></script>
+
+    <!-- Vue templates -->
+    <template id="therapist-list-template">
+        <div class="therapist-list">
+          <h2>Психотерапевты</h2>
+          <therapist-item
+            v-for="therapist in therapists"
+            v-bind:key="therapist.id"
+            v-bind:id="therapist.id"
+            v-bind:name="therapist.name"
+          ></therapist-item>
+        </div>
+    </template>
+
+    <template id="therapist-item-template">
+      <div class="therapist-item">
+
+        <div v-if="$route.params.id" class="row">
+          <div class="col-12 col-md-4">
+            <img :src="[[ $store.getters.getTherapistBySlug($route.params.id)['photo'] ]]" class="img-fluid">
+          </div>
+          <div class="col-12 col-md-8">
+              <h2>
+                [[ $store.getters.getTherapistBySlug($route.params.id)['name'] ]]
+            </h2>
+            <div>
+              [[ $store.getters.getTherapistBySlug($route.params.id)['methods'] ]]
+            </div>
+          </div>
+        </div>
+
+        <div v-else>
+          <b>
+            <router-link v-bind:to="'/therapists/' + id + '/'">
+              [[ name ]]
+            </router-link>
+          </b>
+        </div>
+
+      </div>
+
+    </template>
+
+    <!-- Vue app -->
+    <script>
+      // store
+      const store = new Vuex.Store({
+        state: {
+            therapists: [
+            {% for therapist in therapists %}
+                {
+                  id: '{{ therapist.id }}',
+                  name: '{{ therapist.name }}',
+                  photo: '{{ therapist.photo }}',
+                  methods: '{{ therapist.methods }}',
+                },
+            {% endfor %}
+            ],
+        },
+        getters: {
+          getTherapistBySlug: (state) => (id) => {
+            return state.therapists.find(therapists => therapists.id === id)
+          },
+        }
+      })
+
+      // components
+      TherapistList = Vue.component('therapist-list', {
+        data: function () { return { therapists: store.state.therapists } },
+        template: '#therapist-list-template',
+      });
+
+      TherapistItem = Vue.component('therapist-item', {
+        delimiters: ['[[', ']]'],
+        props: ['id', 'name', 'photo', 'methods'],
+        template: '#therapist-item-template',
+      });
+
+      // router
+      const routes = [
+        { component: TherapistList,  path: '/therapists/',  },
+        { component: TherapistItem,  path: '/therapists/:id/',  },
+      ]
+
+      const router = new VueRouter({
+        mode: 'history',
+        routes: routes,
+      })
+
+      // app
+      const myapp = new Vue({
+          router,
+          store,
+      }).$mount('#therapists');
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  </body>
+</html>
